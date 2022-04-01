@@ -38,6 +38,7 @@ namespace ObjCRuntime {
 		static List <object> delegates;
 		static List <Assembly> assemblies;
 		static Dictionary <IntPtr, GCHandle> object_map;
+		static Dictionary <IntPtr, GCHandle> object_map_resurrectable;
 		static object lock_obj;
 		static IntPtr NSObjectClass;
 		static bool initialized;
@@ -271,6 +272,7 @@ namespace ObjCRuntime {
 			Runtime.options = options;
 			delegates = new List<object> ();
 			object_map = new Dictionary <IntPtr, GCHandle> (IntPtrEqualityComparer);
+			object_map_resurrectable = new Dictionary <IntPtr, GCHandle> (IntPtrEqualityComparer);
 			intptr_ctor_cache = new Dictionary<Type, ConstructorInfo> (TypeEqualityComparer);
 			intptr_bool_ctor_cache = new Dictionary<Type, ConstructorInfo> (TypeEqualityComparer);
 			lock_obj = new object ();
@@ -1067,6 +1069,8 @@ namespace ObjCRuntime {
 			lock (lock_obj) {
 				if (object_map.Remove (ptr, out var value))
 					value.Free ();
+				if (object_map_resurrectable.Remove (ptr, out value))
+					value.Free ();
 			}
 		}
 					
@@ -1078,7 +1082,13 @@ namespace ObjCRuntime {
 						object_map.Remove (ptr);
 						wr.Free ();
 					}
+				}
 
+				if (object_map_resurrectable.TryGetValue (ptr, out wr)) {
+					if (managed_obj is null || wr.Target == (object) managed_obj) {
+						object_map_resurrectable.Remove (ptr);
+						wr.Free ();
+					}
 				}
 
 				if (managed_obj is not null)
@@ -1087,9 +1097,11 @@ namespace ObjCRuntime {
 		}
 		
 		internal static void RegisterNSObject (NSObject obj, IntPtr ptr) {
-			var handle = GCHandle.Alloc (obj, GCHandleType.WeakTrackResurrection);
+			var handle = GCHandle.Alloc (obj, GCHandleType.Weak);
+			var handle_resurrectable = GCHandle.Alloc (obj, GCHandleType.WeakTrackResurrection);
 			lock (lock_obj) {
 				object_map [ptr] = handle;
+				object_map_resurrectable [ptr] = handle_resurrectable;
 				obj.Handle = ptr;
 			}
 		}
@@ -1350,7 +1362,9 @@ namespace ObjCRuntime {
 		internal static NSObject? TryGetNSObject (IntPtr ptr, bool evenInFinalizerQueue)
 		{
 			lock (lock_obj) {
-				if (object_map.TryGetValue (ptr, out var reference)) {
+				var map = evenInFinalizerQueue ? object_map_resurrectable : object_map;
+
+				if (map.TryGetValue (ptr, out var reference)) {
 					var target = (NSObject?) reference.Target;
 					if (target is null)
 						return null;
@@ -1372,7 +1386,7 @@ namespace ObjCRuntime {
 							return null;
 						}
 					}
-					    
+
 					return target;
 				}
 			}
