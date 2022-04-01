@@ -1069,7 +1069,7 @@ namespace ObjCRuntime {
 					value.Free ();
 			}
 		}
-					
+
 		internal static void NativeObjectHasDied (IntPtr ptr, NSObject? managed_obj)
 		{
 			lock (lock_obj) {
@@ -1078,7 +1078,6 @@ namespace ObjCRuntime {
 						object_map.Remove (ptr);
 						wr.Free ();
 					}
-
 				}
 
 				if (managed_obj is not null)
@@ -1087,7 +1086,11 @@ namespace ObjCRuntime {
 		}
 		
 		internal static void RegisterNSObject (NSObject obj, IntPtr ptr) {
+#if NET
+			var handle = GCHandle.Alloc (obj, IsCoreCLR ? GCHandleType.Weak : GCHandleType.WeakTrackResurrection);
+#else
 			var handle = GCHandle.Alloc (obj, GCHandleType.WeakTrackResurrection);
+#endif
 			lock (lock_obj) {
 				object_map [ptr] = handle;
 				obj.Handle = ptr;
@@ -1372,7 +1375,7 @@ namespace ObjCRuntime {
 							return null;
 						}
 					}
-					    
+
 					return target;
 				}
 			}

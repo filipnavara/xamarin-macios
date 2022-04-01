@@ -134,6 +134,14 @@ namespace ObjCRuntime {
 				log_coreclr ($"RegisterToggleReferenceCoreCLR ({obj.GetType ().FullName}, 0x{handle.ToString ("x")}, {isCustomType}) => Info=0x{((IntPtr) tracked_info).ToString ("x")} Flags={tracked_info->Flags}");
 			}
 
+			// Switch the object map handle type to track resurrection
+			var handle_resurrectable = GCHandle.Alloc (obj, GCHandleType.WeakTrackResurrection);
+			lock (lock_obj) {
+				if (object_map.Remove (handle, out var value))
+					value.Free ();
+				object_map [handle] = handle_resurrectable;
+			}
+
 			// Make sure the GCHandle we have is a weak one for custom types.
 			if (isCustomType)
 				xamarin_switch_gchandle (handle, true);
