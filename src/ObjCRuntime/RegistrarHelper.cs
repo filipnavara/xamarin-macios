@@ -7,7 +7,7 @@
 // Copyright 2023 Microsoft Corp
 
 
-// #define TRACE
+#define TRACE
 
 #if NET
 

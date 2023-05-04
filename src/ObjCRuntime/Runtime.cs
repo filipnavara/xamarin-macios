@@ -236,7 +236,7 @@ namespace ObjCRuntime {
 		public static bool DynamicRegistrationSupported {
 			get {
 				// The linker may turn calls to this property into a constant
-				return true;
+				return false;//true;
 			}
 		}
 

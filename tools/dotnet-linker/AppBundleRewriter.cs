@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -1051,6 +1052,16 @@ namespace Xamarin.Linker {
 						&& v.Parameters [0].ParameterType.IsPointer
 						&& v.Parameters [0].ParameterType.GetElementType ().Is ("System", "Void")
 						&& v.HasGenericParameters);
+			}
+		}
+
+		public MethodReference DynamicDependencyAttribute_Constructor {
+			get {
+				return GetMethodReference (CorlibAssembly, "System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute", ".ctor", (v) =>
+					v.HasParameters
+					&& v.Parameters.Count == 2
+					&& v.Parameters [0].ParameterType.FullName == "System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes"
+					&& v.Parameters [1].ParameterType.FullName == System_Type.FullName);
 			}
 		}
 

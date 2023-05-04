@@ -4289,6 +4289,8 @@ namespace Registrar {
 			sb.AppendLine ();
 			if (!staticCall)
 				sb.Append ("typedef ");
+			else
+				pinvokeMethod = $"_{pinvokeMethod}";
 
 			var callbackReturnType = string.Empty;
 			var hasReturnType = true;

@@ -64,6 +64,8 @@ namespace Xamarin.Linker {
 
 		void CreateRegistrarType (AssemblyTrampolineInfo info)
 		{
+			abr.CurrentAssembly.MainModule.ImportReference (abr.System_Diagnostics_CodeAnalysis_DynamicallyAccessedMemberTypes);
+
 			var registrarType = new TypeDefinition ("ObjCRuntime", "__Registrar__", TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit);
 			registrarType.BaseType = abr.System_Object;
 			registrarType.Interfaces.Add (new InterfaceImplementation (abr.ObjCRuntime_IManagedRegistrar));
@@ -264,6 +266,9 @@ namespace Xamarin.Linker {
 				var td = types [i].Definition;
 				if (IsTrimmed (td))
 					throw ErrorHelper.CreateError (99, $"Trying to add the type {td.FullName} to the registrar's lookup tables, but it's been trimmed away.");
+
+				if (!td.IsInterface)
+					lookupTypeMethod.CustomAttributes.Add (CreateDynamicDependencyAttribute (DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors, types [i].Reference));
 			}
 
 			il.Emit (OpCodes.Ldarg_1);
@@ -481,6 +486,14 @@ namespace Xamarin.Linker {
 			} else {
 				type.IsPublic = true;
 			}
+		}
+
+		CustomAttribute CreateDynamicDependencyAttribute (DynamicallyAccessedMemberTypes memberTypes, TypeReference typeRef)
+		{
+			var ca = new CustomAttribute (abr.DynamicDependencyAttribute_Constructor);
+			ca.ConstructorArguments.Add (new CustomAttributeArgument (abr.System_Diagnostics_CodeAnalysis_DynamicallyAccessedMemberTypes, memberTypes));
+			ca.ConstructorArguments.Add (new CustomAttributeArgument (abr.System_Type, typeRef));
+			return ca;
 		}
 
 		StaticRegistrar StaticRegistrar {

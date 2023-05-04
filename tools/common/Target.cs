@@ -689,7 +689,7 @@ namespace Xamarin.Bundler {
 
 			register_assemblies.AppendLine ("\tGCHandle exception_gchandle = INVALID_GCHANDLE;");
 			foreach (var s in assemblies) {
-				if (!s.IsAOTCompiled)
+				if (!s.IsAOTCompiled || App.XamarinRuntime == XamarinRuntime.NativeAOT)
 					continue;
 
 				var info = s.AssemblyDefinition.Name.Name;

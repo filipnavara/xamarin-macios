@@ -20,16 +20,12 @@
 #include "xamarin/xamarin.h"
 #include "xamarin/coreclr-bridge.h"
 
-typedef void (*xamarin_runtime_initialize_decl)(struct InitializationOptions* options, GCHandle* exception_gchandle);
+extern "C" void xamarin_objcruntime_runtime_nativeaotinitialize (struct InitializationOptions* options, GCHandle* exception_gchandle);
+
 void
 xamarin_bridge_call_runtime_initialize (struct InitializationOptions* options, GCHandle* exception_gchandle)
 {
-	void *del = dlsym (RTLD_DEFAULT, "xamarin_objcruntime_runtime_nativeaotinitialize");
-	if (del == NULL)
-		xamarin_assertion_message ("xamarin_bridge_call_runtime_initialize: failed to load xamarin_objcruntime_runtime_nativeaotinitialize: %s\n", dlerror ());
-
-	xamarin_runtime_initialize_decl runtime_initialize = (xamarin_runtime_initialize_decl) del;
-	runtime_initialize (options, exception_gchandle);
+	xamarin_objcruntime_runtime_nativeaotinitialize (options, exception_gchandle);
 }
 
 #endif // NATIVEAOT
