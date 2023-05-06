@@ -1162,7 +1162,7 @@
 	</Target>
 
 	<!-- Override the NativeAOT targets -->
-	<Target Name="ComputeLinkedFilesToPublish" BeforeTargets="ComputeResolvedFilesToPublishList" DependsOnTargets="_ComputeAssembliesToCompileToNative;LinkNative" />
+	<Target Name="ComputeLinkedFilesToPublish" BeforeTargets="ComputeResolvedFilesToPublishList" DependsOnTargets="_ComputeAssembliesToCompileToNative;LinkNative" Condition="'$(_XamarinRuntime)' == 'NativeAOT'" />
 	<Target Name="LinkNative" DependsOnTargets="$(LinkNativeDependsOn)" />
 
 	<PropertyGroup>
