@@ -64,8 +64,6 @@ namespace Xamarin.Linker {
 
 		void CreateRegistrarType (AssemblyTrampolineInfo info)
 		{
-			abr.CurrentAssembly.MainModule.ImportReference (abr.System_Diagnostics_CodeAnalysis_DynamicallyAccessedMemberTypes);
-
 			var registrarType = new TypeDefinition ("ObjCRuntime", "__Registrar__", TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit);
 			registrarType.BaseType = abr.System_Object;
 			registrarType.Interfaces.Add (new InterfaceImplementation (abr.ObjCRuntime_IManagedRegistrar));
@@ -128,8 +126,12 @@ namespace Xamarin.Linker {
 
 			// Make sure the linker doesn't sweep away anything we just generated.
 			Annotations.Mark (registrarType);
-			foreach (var method in registrarType.Methods)
+			foreach (var method in registrarType.Methods) {
+				foreach (var attr in method.CustomAttributes) {
+					Annotations.Mark (attr);
+				}
 				Annotations.Mark (method);
+			}
 			foreach (var iface in registrarType.Interfaces) {
 				Annotations.Mark (iface);
 				Annotations.Mark (iface.InterfaceType);
