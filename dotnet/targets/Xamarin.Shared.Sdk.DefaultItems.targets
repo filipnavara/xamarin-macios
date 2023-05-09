@@ -12,7 +12,7 @@
     <EnableDefaultMacCatalystItems Condition=" '$(_PlatformName)' == 'MacCatalyst' And '$(EnableDefaultMacCatalystItems)' == '' ">$(EnableDefaultItems)</EnableDefaultMacCatalystItems>
 
     <UseMonoRuntime Condition=" '$(UseMonoRuntime)' == '' And '$(_PlatformName)' == 'macOS'">false</UseMonoRuntime>
-    <UseMonoRuntime Condition=" '$(UseMonoRuntime)' == '' And '$(_PlatformName)' == 'iOS' And '$(PublishAot)' == 'true'">false</UseMonoRuntime>
+    <UseMonoRuntime Condition=" '$(UseMonoRuntime)' == '' And '$(PublishAot)' == 'true'">false</UseMonoRuntime>
     <UseMonoRuntime Condition=" '$(UseMonoRuntime)' == ''">true</UseMonoRuntime>
   </PropertyGroup>
 

@@ -889,7 +889,6 @@
 
 	<Target Name="_VerifyValidRuntime">
 		<Error Text="Only CoreCLR is supported on macOS. Set 'UseMonoRuntime=false' to use CoreCLR." Condition="'$(_PlatformName)' == 'macOS' And '$(UseMonoRuntime)' != 'false'" />
-		<Error Text="NativeAOT is currently not supported on $(_PlatformName). Set 'PublishAot=false' to disable NativeAOT." Condition="'$(_XamarinRuntime)' == 'NativeAOT' And '$(_PlatformName)' != 'iOS'" />
 	</Target>
 
 	<PropertyGroup>
