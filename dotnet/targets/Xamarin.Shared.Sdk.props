@@ -55,7 +55,7 @@
 
 		<!-- NativeAOT properties that must be set early on. -->
 		<IlcKeepManagedDebuggerSupport>true</IlcKeepManagedDebuggerSupport>
-		<IlcCompileDependsOn>Compile;_ComputeLinkerArguments;_XamarinILLink;SetupOSSpecificProps;PrepareForILLink;_XamarinComputeIlcCompileInputs</IlcCompileDependsOn>
+		<IlcCompileDependsOn>SetupOSSpecificProps;PrepareForILLink;_XamarinComputeIlcCompileInputs</IlcCompileDependsOn>
 		<CustomNativeMain>true</CustomNativeMain>
 	</PropertyGroup>
 

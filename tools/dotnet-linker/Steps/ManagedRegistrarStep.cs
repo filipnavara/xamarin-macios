@@ -286,16 +286,12 @@ namespace Xamarin.Linker {
 				callbackType = new TypeDefinition (string.Empty, "__Registrar_Callbacks__", TypeAttributes.NestedPrivate | TypeAttributes.Sealed | TypeAttributes.Class);
 				callbackType.BaseType = abr.System_Object;
 				method.DeclaringType.NestedTypes.Add (callbackType);
-				DerivedLinkContext.Annotations.Mark (callbackType);
 			}
 
 			var callback = callbackType.AddMethod (name, MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig, placeholderType);
 			callback.CustomAttributes.Add (CreateUnmanagedCallersAttribute (name));
 			infos.Add (new TrampolineInfo (callback, method, name));
 
-			DerivedLinkContext.Annotations.Mark (callback);
-			DerivedLinkContext.Annotations.AddPreservedMethod (method, callback);
-			DerivedLinkContext.Annotations.AddPreservedMethod (callback, method);
 			// If the target method is marked, then we must mark the trampoline as well.
 			method.CustomAttributes.Add (CreateDynamicDependencyAttribute (callbackType, callback.Name));
 

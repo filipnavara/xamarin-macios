@@ -412,15 +412,12 @@
 		</ItemGroup>
 	</Target>
 
-	<Target Name="_ComputeResolvedFilesToPublishList" DependsOnTargets="$(ComputeResolvedFilesToPublishList)" Condition="'$(_XamarinRuntime)' != 'NativeAOT'" />
-	<Target Name="_ComputeResolvedFilesToPublishList" Condition="'$(_XamarinRuntime)' != 'NativeAOT'" />
-
 	<PropertyGroup>
 		<_ComputeLinkerArgumentsDependsOn>
 			_ComputeLinkMode;
 			_ComputeFrameworkVariables;
 			_ComputeFrameworkAssemblies;
-			_ComputeResolvedFilesToPublishList;
+			ComputeResolvedFilesToPublishList;
 			_ParseBundlerArguments;
 			_ComputeVariables;
 			_CreateRuntimeConfiguration;
@@ -429,6 +426,7 @@
 			_DetectAppManifest;
 			_ReadAppManifest;
 			_WriteAppManifest;
+			_ComputeManagedAssemblyToLink;
 		</_ComputeLinkerArgumentsDependsOn>
 	</PropertyGroup>
 
@@ -791,7 +789,7 @@
 	</Target>
 
 
-	<Target Name="_LoadLinkerOutput" DependsOnTargets="ComputeFilesToPublish" Condition="'$(IsMacEnabled)' == 'true'">
+	<Target Name="_LoadLinkerOutput" DependsOnTargets="_XamarinILLink;ComputeFilesToPublish" Condition="'$(IsMacEnabled)' == 'true'">
 		<!-- Load _MainFile -->
 		<ReadItemsFromFile SessionId="$(BuildSessionId)" File="$(_LinkerItemsDirectory)/_MainFile.items" Condition="Exists('$(_LinkerItemsDirectory)/_MainFile.items')">
 			<Output TaskParameter="Items" ItemName="_MainFile" />
@@ -880,7 +878,7 @@
 		</PropertyGroup>
 	</Target>
 
-	<Target Name="_ComputeFrameworkAssemblies" DependsOnTargets="_ComputeVariables;_ComputeResolvedFilesToPublishList">
+	<Target Name="_ComputeFrameworkAssemblies" DependsOnTargets="_ComputeVariables;ComputeResolvedFilesToPublishList">
 		<ItemGroup>
 			<!-- Define 'framework assembly' or 'sdk assembly' as assemblies that comes from the .NET BCL NuGet -->
 			<_XamarinFrameworkAssemblies Include="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Extension)' == '.dll' And '%(ResolvedFileToPublish.NuGetPackageId)' == '$(_MonoNugetPackageId)'" />
@@ -903,7 +901,7 @@
 			publish (except the merged app bundle, which we'll handle
 			ourselves).
 		-->
-		<_ComputeVariablesDependsOn Condition="'$(RuntimeIdentifiers)' == ''">$(_ComputeVariablesDependsOn);_ComputeResolvedFilesToPublishList</_ComputeVariablesDependsOn>
+		<_ComputeVariablesDependsOn Condition="'$(RuntimeIdentifiers)' == ''">$(_ComputeVariablesDependsOn);ComputeResolvedFilesToPublishList</_ComputeVariablesDependsOn>
 	</PropertyGroup>
 
 	<Target Name="_ComputeVariables" DependsOnTargets="$(_ComputeVariablesDependsOn)">
@@ -1130,7 +1128,11 @@
 		</ItemGroup>
 	</Target>
 
-	<Target Name="_XamarinILLink" Inputs="@(ManagedAssemblyToLink)" Outputs="@(ManagedAssemblyToLink->'$(IntermediateLinkDir)%(Filename)%(Extension)')" DependsOnTargets="_RunILLink" />
+	<Target Name="_XamarinILLink"
+			Inputs="@(ManagedAssemblyToLink)"
+			Outputs="@(ManagedAssemblyToLink->'$(IntermediateLinkDir)%(Filename)%(Extension)')"
+			DependsOnTargets="_RunILLink"
+			Condition="'$(_XamarinRuntime)' == 'NativeAOT'" />
 
 	<Target Name="_XamarinComputeIlcCompileInputs">
 		<PropertyGroup>
@@ -1142,14 +1144,14 @@
 
 			<_UpdatedManagedAssemblyToLink Include="@(ManagedAssemblyToLink->'$(IntermediateLinkDir)%(Filename)%(Extension)')" Condition="Exists('$(IntermediateLinkDir)%(Filename)%(Extension)')" />
 			<ManagedAssemblyToLink Remove="@(ManagedAssemblyToLink)" />
-			<ManagedAssemblyToLink Include="@(_UpdatedManagedAssemblyToLink)" />
+			<ManagedAssemblyToLink Include="@(_UpdatedManagedAssemblyToLink);@(PrivateSdkAssemblies)" />
 
 			<UnmanagedEntryPointsAssembly Remove="System.Private.CoreLib" />
 			<UnmanagedEntryPointsAssembly Include="@(_UpdatedManagedAssemblyToLink->'%(Filename)')" />
 
 			<ManagedBinary Include="$(IntermediateLinkDir)$(TargetName)$(TargetExt)" />
 			<IlcCompileInput Include="@(ManagedBinary)" />
-			<IlcReference Include="@(ManagedAssemblyToLink->'$(IntermediateLinkDir)%(Filename)%(Extension)')" Exclude="@(ManagedBinary)" />
+			<IlcReference Include="@(ManagedAssemblyToLink)" Exclude="@(ManagedBinary)" />
 
 			<TrimmerRootAssembly Remove="@(TrimmerRootAssembly)" />
 			<!--<TrimmerRootAssembly Include="@(ManagedAssemblyToLink->'$(IntermediateLinkDir)%(Filename)%(Extension)')" />-->
@@ -1166,8 +1168,9 @@
 	</Target>
 
 	<!-- Override the NativeAOT targets -->
-	<Target Name="ComputeLinkedFilesToPublish" BeforeTargets="ComputeResolvedFilesToPublishList" DependsOnTargets="_ComputeAssembliesToCompileToNative;LinkNative" Condition="'$(_XamarinRuntime)' == 'NativeAOT'" />
-	<Target Name="LinkNative" DependsOnTargets="$(LinkNativeDependsOn)" />
+	<Target Name="_ComputeManagedAssemblyForILLink" />
+	<Target Name="ComputeLinkedFilesToPublish" />
+	<Target Name="LinkNative" />
 
 	<PropertyGroup>
 		<_GenerateBindingsDependsOn>
@@ -1212,6 +1215,11 @@
 			_WriteAppManifest;
 			_ComputeNativeExecutableInputs;
 			_AOTCompile;
+		</_CompileNativeExecutableDependsOn>
+
+		<_CompileNativeExecutableDependsOn Condition="'$(PublishAot)' == 'true'">
+			$(_CompileNativeExecutableDependsOn);
+			IlcCompile;
 		</_CompileNativeExecutableDependsOn>
 	</PropertyGroup>
 
