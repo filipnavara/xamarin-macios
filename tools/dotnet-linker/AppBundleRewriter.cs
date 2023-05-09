@@ -216,6 +216,12 @@ namespace Xamarin.Linker {
 			}
 		}
 
+		public TypeReference System_Diagnostics_CodeAnalysis_DynamicallyAccessedMemberTypes {
+			get {
+				return GetTypeReference (CorlibAssembly, "System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes", out var _);
+			}
+		}
+
 		public TypeReference System_Diagnostics_CodeAnalysis_DynamicDependencyAttribute {
 			get {
 				return GetTypeReference (CorlibAssembly, "System.Diagnostics.CodeAnalysis.DynamicDependencyAttribute", out var _);

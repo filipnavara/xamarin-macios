@@ -4290,7 +4290,7 @@ namespace Registrar {
 			if (!staticCall)
 				sb.Append ("typedef ");
 			else
-				pinvokeMethod = $"_{pinvokeMethod}";
+				ucoEntryPoint = $"_{ucoEntryPoint}";
 
 			var callbackReturnType = string.Empty;
 			var hasReturnType = true;
