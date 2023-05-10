@@ -464,7 +464,7 @@
 			-->
 			<_AssembliesWithCustomTrimMode>@(ManagedAssemblyToLink->HasMetadata('TrimMode')->Count())</_AssembliesWithCustomTrimMode>
 			<_AssembliesWithCopyTrimMode>@(ManagedAssemblyToLink->WithMetadataValue('TrimMode', 'copy')->Count())</_AssembliesWithCopyTrimMode>
-			<_AreAnyAssembliesTrimmed Condition="'$(_AreAnyAssembliesTrimmed)' == '' And '$(TrimMode)' == 'copy' And '$(_AssembliesWithCustomTrimMode)' == '$(_AssembliesWithCopyTrimMode)'">false</_AreAnyAssembliesTrimmed>
+			<_AreAnyAssembliesTrimmed Condition="'$(_AreAnyAssembliesTrimmed)' == '' And '$(TrimMode)' == 'copy' And '$(_AssembliesWithCustomTrimMode)' == '$(_AssembliesWithCopyTrimMode)' And '$(PublishAot)' != 'true'">false</_AreAnyAssembliesTrimmed>
 			<_AreAnyAssembliesTrimmed Condition="'$(_AreAnyAssembliesTrimmed)' == ''">true</_AreAnyAssembliesTrimmed>
 
 			<_CustomLinkerOptions>
