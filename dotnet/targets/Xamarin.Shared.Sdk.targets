@@ -968,6 +968,10 @@
 		</PropertyGroup>
 
 		<ItemGroup>
+			<!-- Remove runtime .dylib files for NativeAOT publishing -->
+			<_FilesToDrop Include="@(ResolvedFileToPublish)" Condition="'$(PublishAot)' == 'true' and '%(ResolvedFileToPublish.DropFromSingleFile)' == 'true' and !$([System.String]::new('%(ResolvedFileToPublish.Filename)').StartsWith('libSystem'))"/>
+			<ResolvedFileToPublish Remove="@(_FilesToDrop)" />
+
 			<!-- Select the native libraries from mono we need to link with and potentially copy into the app -->
 			<_MonoLibrary
 				Include="@(ResolvedFileToPublish)"
