@@ -62,7 +62,7 @@ namespace AppKit {
 
 			initialized = true;
 
-			//Runtime.RegisterAssemblies ();
+			Runtime.RegisterAssemblies ();
 
 			// Runtime hosts embedding MonoMac may use a different sync context 
 			// and call NSApplicationMain externally prior to this Init, so only
