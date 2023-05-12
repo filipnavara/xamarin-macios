@@ -4289,8 +4289,6 @@ namespace Registrar {
 			sb.AppendLine ();
 			if (!staticCall)
 				sb.Append ("typedef ");
-			else
-				ucoEntryPoint = $"_{ucoEntryPoint}";
 
 			var callbackReturnType = string.Empty;
 			var hasReturnType = true;
