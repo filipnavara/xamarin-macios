@@ -1485,10 +1485,13 @@ namespace Xamarin.Bundler {
 #if NET
 			if (Platform == ApplePlatform.MacOSX)
 				return false; // AOT on .NET for macOS hasn't been implemented yet.
+			if (XamarinRuntime == XamarinRuntime.CoreCLR)
+				return false;
 #else
 			if (Platform == ApplePlatform.MacOSX)
 				throw ErrorHelper.CreateError (99, Errors.MX0099, "IsAOTCompiled isn't a valid operation for macOS apps.");
 #endif
+
 			if (!UseInterpreter) {
 				if (Platform == ApplePlatform.MacCatalyst)
 					return IsArchEnabled (Abi.ARM64);
