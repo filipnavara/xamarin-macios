@@ -296,6 +296,11 @@ namespace Foundation {
 #if !NET || !__MACOS__
 		[MethodImplAttribute (MethodImplOptions.InternalCall)]
 		extern static void RegisterToggleRef (NSObject obj, IntPtr handle, bool isCustomType);
+
+		static void RegisterToggleReferenceMono (NSObject obj, IntPtr handle, bool isCustomType)
+		{
+			RegisterToggleRef (obj, handle, isCustomType);
+		}
 #endif // !NET || !__MACOS__
 
 		[DllImport ("__Internal")]
@@ -309,7 +314,7 @@ namespace Foundation {
 			if (Runtime.IsCoreCLR) {
 				Runtime.RegisterToggleReferenceCoreCLR (obj, handle, isCustomType);
 			} else {
-				RegisterToggleRef (obj, handle, isCustomType);
+				RegisterToggleReferenceMono (obj, handle, isCustomType);
 			}
 #else
 			RegisterToggleRef (obj, handle, isCustomType);
